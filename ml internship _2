@@ -1,0 +1,45 @@
+import pandas as pd
+import numpy as np
+import os
+import cv2
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
+import matplotlib.pyplot as plt
+import seaborn as sns
+# load the data
+d = pd.read_csv('/content/archive (2).zip')
+d.head()
+# missing value
+d.isnull().sum()
+# clustering
+x=d[['Annual Income (k$)','Spending Score (1-100)']]
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+x_scaled = scaler.fit_transform(x)
+from sklearn.cluster import KMeans
+kmeans = KMeans(n_clusters=5, random_state=42)
+kmeans.fit(x_scaled)
+#Elbow  method to find the optimal number of clusters
+wcss = []
+for i in range(1, 11):
+    kmeans = KMeans(n_clusters = i, init = 'k-means++', random_state = 42)
+    kmeans.fit(x_scaled)
+    wcss.append(kmeans.inertia_)
+
+plt.plot(range(1, 11), wcss)
+plt.title('The Elbow Method')
+plt.xlabel('Number of clusters')
+plt.ylabel('WCSS')
+plt.show()
+# applying k-means with the optimal number of clusters
+kmeans = KMeans(n_clusters=5, random_state=42)
+kmeans.fit(x_scaled)
+plt.scatter(x_scaled[:, 0], x_scaled[:, 1], c=kmeans.labels_, cmap='rainbow')
+plt.scatter(kmeans.cluster_centers_[:, 0], kmeans.cluster_centers_[:, 1], marker='X', color='black')
+plt.title('Clusters of customers')
+plt.xlabel('Annual Income (k$)')
+plt.ylabel('Spending Score (1-100)')
+plt.show()
